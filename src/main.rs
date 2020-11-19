@@ -10,10 +10,23 @@ fn help() {
     std::process::exit(0);
 }
 
+fn search(package: &str) {
+
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
         help();
+    }
+    if args.len() == 3 {
+        if &args[1] == "search" {
+            search(&args[2]);
+        } else if &args[1] == "install" {
+            install(&args[2]);
+        } else {
+            help();
+        }       
     }
 
 }
