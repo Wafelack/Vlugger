@@ -11,15 +11,21 @@ This package manager uses [pathogen](https://github.com/tpope/vim-pathogen) and 
 ### Windows
 
 - Go to releases and download the latest executable
+
 **or**
+
 - Run `cargo install vlugger`
 
 ### \*Nix
 
 - Go to releases and download the latest executable
+
 **or**
+
 - Download and run installer.sh
+
 **or**
+
 - Run `cargo install vlugger` in `/bin/`
 
 ## Getting started
