@@ -39,7 +39,7 @@ Run `vlugger search <plugin_author>/<plugin_repo>` *Note : The repo has to be on
 
 If the repo exists, then run : 
 
-- If you keep your ~/ version controlled : `vlugger install <plugin_author>/<plugin_repo>`
+- If you keep your `~/` version controlled : `vlugger install <plugin_author>/<plugin_repo>`
 - If you don't : `vlugger install <plugin_author>/<plugin_repo> --no-vcs`
 
 ### Getting more help
