@@ -38,14 +38,21 @@ fn install(package: &str, novcs: bool) {
         (splited[0], splited[1])
     };
    
-  let output = Command::new("git").arg("clone").arg(&format!("https://github.com/{}/{}.git", user, repo)).arg(&format!("{}/.vim/bundle/{}",dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap(), repo)).output().unwrap();
+    let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
+
+  let output = Command::new("git").arg("clone").arg(&format!("https://github.com/{}/{}.git", user, repo)).arg(&format!("{}/.vim/bundle/{}",home_dir, repo)).output().unwrap();
 
     if output.status.success() {
         println!("Plugin installed successfully");
     } else {
         println!("An error occured. Please retry later");
     }
-
+    if !novcs {
+       let cur_dir = std::env::current_dir().unwrap();
+       std::env::set_current_dir(home_dir).unwrap();
+       Command::new("git").arg("submodule").arg("add").arg(&format!("https://github.com/{}/{}", user, repo)).arg(&format!(".vim/bundle/{}", repo)).output().unwrap();
+       std::env::set_current_dir(cur_dir).unwrap();
+    }
 }
 fn search(package: &str) {
    if exists(package) {
