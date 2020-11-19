@@ -1,8 +1,8 @@
+<div align="center">
+	
 # Vlugger
 
-Vlugger is a simple plugin manger for Vim.
-
-<div align="center">
+Vlugger is a simple plugin manager for Vim.
 	
 ![Crates.io](https://img.shields.io/crates/d/vlugger?label=Downloads%20%28crates.io%29)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Wafelack/vlugger?color=sucess&label=Stars&logo=Github)
