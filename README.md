@@ -18,7 +18,7 @@ This package manager uses [pathogen](https://github.com/tpope/vim-pathogen) and 
 
 - Go to releases and download the latest executable
 **or**
-- Download and run updater.sh
+- Download and run installer.sh
 **or**
 - Run `cargo install vlugger` in `/bin/`
 

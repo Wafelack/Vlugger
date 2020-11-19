@@ -18,10 +18,18 @@ fn match_args(args: Vec<String>)  {
         if &args[1] == "search" {
             search(&args[2]);
         } else if &args[1] == "install" {
-            install(&args[2], false);
+            install(&args[2], true);
         } else {
             help();
         } 
+    } else {
+        if &args[1] == "search" {
+            search(&args[2]);
+        } else if &args[1] == "install" {
+            install(&args[2], false);
+        } else {
+            help();
+        }
     }
 }
 fn install(package: &str, novcs: bool) {
@@ -72,6 +80,11 @@ fn exists(package: &str) -> bool {
     
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+
+    if args.len() == 2 && args[1] == "-v" {
+        println!("{}", env!("CARGO_PKG_VERSION"));
+        std::process::exit(0);
+    }
 
     if args.len() == 3 {
         if &args[1] == "search" {
