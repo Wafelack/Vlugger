@@ -7,6 +7,11 @@ echo "1) Install" ; echo "2) Update" ; echo "3) Exit"
 read -p 'Type the number : ' choice
 
 if [ $choice = '1' ];then
+		if command -v vlugger &> /dev/null
+		then
+				echo "Vlugger is already installed"
+				exit
+		fi
 		cargo install vlugger
 elif [ $choice = '2' ];then
 
