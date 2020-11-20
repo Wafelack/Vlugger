@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 use std::process::Command;
 use dirs;
+use std::fs;
 
 fn help() {
     eprintln!("Vlugger by {} version {}", env!("CARGO_PKG_AUTHORS"), env!("CARGO_PKG_VERSION"));
-    eprintln!("\nvlugger <install | search> <username>/<repo> [--no-vcs]");
+    eprintln!("\nvlugger <install | search | update> <username>/<repo> [--no-vcs]");
     eprintln!("\nOPTIONS:");
+    eprintln!("\tupdate  : update all the plugins in ~/.vim/bundle");
     eprintln!("\tinstall : install the specified plugin");
     eprintln!("\tsearch  : search for the specified plugin");
     eprintln!("\nFLAGS:");
@@ -13,6 +15,34 @@ fn help() {
 
     std::process::exit(0);
 }
+
+fn update() {
+    let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
+    let dir = match fs::read_dir(&format!("{}/.vim/bundle", home_dir)) {
+        Ok(d) => d,
+        Err(_e) => {
+            eprintln!("Cannot find directory {}/.vim/bundle/", home_dir);
+            std::process::exit(-8);
+        }
+    }; 
+
+    for entry in dir {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_e) => {
+                eprintln!("Failed to read dir");
+                std::process::exit(-7);
+            }
+        };
+        let path = entry.path();
+
+        if path.is_dir() {
+            std::env::set_current_dir(path).unwrap();
+            Command::new("git").arg("pull").status().unwrap();
+        }
+    }
+}
+
 fn match_args(args: Vec<String>)  {
     if &args[3] == "--no-vcs" {
         if &args[1] == "search" {
@@ -45,10 +75,10 @@ fn install(package: &str, novcs: bool) {
         }
         (splited[0], splited[1])
     };
-   
+
     let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
 
-  let output = Command::new("git").arg("clone").arg(&format!("https://github.com/{}/{}.git", user, repo)).arg(&format!("{}/.vim/bundle/{}",home_dir, repo)).output().unwrap();
+    let output = Command::new("git").arg("clone").arg(&format!("https://github.com/{}/{}.git", user, repo)).arg(&format!("{}/.vim/bundle/{}",home_dir, repo)).output().unwrap();
 
     if output.status.success() {
         println!("Plugin installed successfully");
@@ -56,34 +86,39 @@ fn install(package: &str, novcs: bool) {
         println!("An error occured. Please retry later");
     }
     if !novcs {
-       let cur_dir = std::env::current_dir().unwrap();
-       std::env::set_current_dir(home_dir).unwrap();
-       Command::new("git").arg("submodule").arg("add").arg(&format!("https://github.com/{}/{}", user, repo)).arg(&format!(".vim/bundle/{}", repo)).output().unwrap();
-       std::env::set_current_dir(cur_dir).unwrap();
+        let cur_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(home_dir).unwrap();
+        Command::new("git").arg("submodule").arg("add").arg(&format!("https://github.com/{}/{}", user, repo)).arg(&format!(".vim/bundle/{}", repo)).output().unwrap();
+        std::env::set_current_dir(cur_dir).unwrap();
     }
 }
 fn search(package: &str) {
-   if exists(package) {
+    if exists(package) {
         println!("Plugin `{}` exists", package);
-   } else {
+    } else {
         println!("PLugin `{}` does not exists", package);
-   }
+    }
 }
 fn exists(package: &str) -> bool {
-   let res = Command::new("curl").arg(&format!("https://api.github.com/repos/{}", package)).output().unwrap();
-   if std::str::from_utf8(&res.stdout).unwrap().contains("Not Found") {
+    let res = Command::new("curl").arg(&format!("https://api.github.com/repos/{}", package)).output().unwrap();
+    if std::str::from_utf8(&res.stdout).unwrap().contains("Not Found") {
         return false
-   } else {
+    } else {
         return true; 
-   }
+    }
 }
-    
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() == 2 && args[1] == "-v" {
-        println!("{}", env!("CARGO_PKG_VERSION"));
-        std::process::exit(0);
+    if args.len() == 2{
+        if &args[1] == "-v" {
+            println!("{}", env!("CARGO_PKG_VERSION"));
+            std::process::exit(0);
+        } else if &args[1] == "update" {
+            update();
+            std::process::exit(0);
+        }
     }
 
     if args.len() == 3 {

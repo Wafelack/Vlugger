@@ -41,6 +41,10 @@ If the repo exists, then run :
 - If you keep your `~/` version controlled : `vlugger install <plugin_author>/<plugin_repo>`
 - If you don't : `vlugger install <plugin_author>/<plugin_repo> --no-vcs`
 
+### Update your plugins
+
+Run `vlugger update` to update all the plugins located in `~/.vim/bundle/`.
+
 ### Getting more help
 
 Run `vlugger --help` for help
