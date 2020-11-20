@@ -6,7 +6,6 @@ Vlugger is a simple plugin manager for Vim.
 	
 ![Crates.io](https://img.shields.io/crates/d/vlugger?label=Downloads%20%28crates.io%29)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Wafelack/vlugger?color=sucess&label=Stars&logo=Github)
-![GitHub all releases](https://img.shields.io/github/downloads/Wafelack/vlugger/total?label=Downloads%20%28GitHub%20releases%29)
 		
 </div>
 
