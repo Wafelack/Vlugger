@@ -1,6 +1,6 @@
 [package]
 name = "vlugger"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Wafelack <wafelack@protonmail.com>"]
 edition = "2018"
 description = "Vlugger is a plugin manager for Vim"

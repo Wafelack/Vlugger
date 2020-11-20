@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 use std::process::Command;
 use dirs;
+use std::fs;
 
 fn help() {
     eprintln!("Vlugger by {} version {}", env!("CARGO_PKG_AUTHORS"), env!("CARGO_PKG_VERSION"));
-    eprintln!("\nvlugger <install | search> <username>/<repo> [--no-vcs]");
+    eprintln!("\nvlugger <install | search | update> <username>/<repo> [--no-vcs]");
     eprintln!("\nOPTIONS:");
+    eprintln!("\tupdate  : update all the plugins in ~/.vim/bundle");
     eprintln!("\tinstall : install the specified plugin");
     eprintln!("\tsearch  : search for the specified plugin");
     eprintln!("\nFLAGS:");
@@ -15,7 +17,30 @@ fn help() {
 }
 
 fn update() {
+    let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
+    let dir = match fs::read_dir(&format!("{}/.vim/bundle", home_dir)) {
+        Ok(d) => d,
+        Err(_e) => {
+            eprintln!("Cannot find directory {}/.vim/bundle/", home_dir);
+            std::process::exit(-8);
+        }
+    }; 
 
+    for entry in dir {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_e) => {
+                eprintln!("Failed to read dir");
+                std::process::exit(-7);
+            }
+        };
+        let path = entry.path();
+
+        if path.is_dir() {
+            std::env::set_current_dir(path).unwrap();
+            Command::new("git").arg("pull").status().unwrap();
+        }
+    }
 }
 
 fn match_args(args: Vec<String>)  {
@@ -92,6 +117,7 @@ fn main() {
             std::process::exit(0);
         } else if &args[1] == "update" {
             update();
+            std::process::exit(0);
         }
     }
 
