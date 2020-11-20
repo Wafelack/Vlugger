@@ -104,7 +104,12 @@ fn exists(package: &str) -> bool {
     if std::str::from_utf8(&res.stdout).unwrap().contains("Not Found") {
         return false
     } else {
-        return true; 
+        let langs = Command::new("curl").arg(&format!("https://api.github.com/repos/{}/languages", package)).output().unwrap();
+        if std::str::from_utf8(&langs.stdout).unwrap().contains("Vim") {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
