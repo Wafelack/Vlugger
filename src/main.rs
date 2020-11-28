@@ -5,13 +5,14 @@ use std::fs;
 
 fn help() {
     eprintln!("Vlugger by {} version {}", env!("CARGO_PKG_AUTHORS"), env!("CARGO_PKG_VERSION"));
-    eprintln!("\nvlugger <install | search | update> <username>/<repo> [--no-vcs]");
+    eprintln!("\nvlugger <install | search | update | uninstall> <username>/<repo> [--no-vcs]");
     eprintln!("\nOPTIONS:");
-    eprintln!("\tupdate  : update all the plugins in ~/.vim/bundle");
-    eprintln!("\tinstall : install the specified plugin");
-    eprintln!("\tsearch  : search for the specified plugin");
+    eprintln!("\tupdate    : update all the plugins in ~/.vim/bundle");
+    eprintln!("\tinstall   : install the specified plugin");
+    eprintln!("\tsearch    : search for the specified plugin");
+    eprintln!("\tuninstall : uninstall the specified plugin");
     eprintln!("\nFLAGS:");
-    eprintln!("\t--no-vcs : Specifies that the ~/ folder is not version controlled ( a submodule to the plugin will be added without this option)");
+    eprintln!("\t--no-vcs  : Specifies that the ~/ folder is not version controlled ( a submodule to the plugin will be added without this option)");
 
     std::process::exit(0);
 }
@@ -29,8 +30,9 @@ fn update() {
     for entry in dir {
         let entry = match entry {
             Ok(e) => e,
-            Err(_e) => {
+            Err(e) => {
                 eprintln!("Failed to read dir");
+                eprintln!("Debug info : {}", e);
                 std::process::exit(-7);
             }
         };
@@ -49,6 +51,8 @@ fn match_args(args: Vec<String>)  {
             search(&args[2]);
         } else if &args[1] == "install" {
             install(&args[2], true);
+        }  else if &args[1] == "uninstall" {
+            uninstall(&args[2]);
         } else {
             help();
         } 
@@ -57,9 +61,55 @@ fn match_args(args: Vec<String>)  {
             search(&args[2]);
         } else if &args[1] == "install" {
             install(&args[2], false);
+        } else if &args[1] == "uninstall" {
+            uninstall(&args[2]);
         } else {
             help();
         }
+    }
+}
+
+fn uninstall(package: &str) {
+    let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
+    let dir = match fs::read_dir(&format!("{}/.vim/bundle", home_dir)) {
+        Ok(d) => d,
+        Err(e) => {
+            eprintln!("Cannot find directory {}/.vim/bundle/", home_dir);
+            eprintln!("Debug info : {}", e);
+            std::process::exit(-8);
+        }
+    }; 
+    let mut found = false;
+    for entry in dir {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(e) => {
+                eprintln!("Failed to read Dir");
+                eprintln!("Debug info : {}", e);
+                std::process::exit(-7);
+            }
+        };
+        let path = entry.path();
+        if path == std::path::Path::new(&format!("{}/.vim/bundle/{}", home_dir, package)) {
+            match fs::remove_dir_all(entry.path()) {
+                Ok(()) => {
+                    found = true;
+                }
+                Err(e) => {
+                    eprintln!("Failed to remove folder");
+                    eprintln!("Debug info : {}", e);
+                    std::process::exit(-8); 
+                }
+            }
+        }
+
+    }
+
+    if found {
+        println!("Successfully uninstalled `{}`", package);
+    } else {
+        eprintln!("Package `{}` not found", package);
+        std::process::exit(-9);
     }
 }
 fn install(package: &str, novcs: bool) {
@@ -131,6 +181,8 @@ fn main() {
             search(&args[2]);
         } else if &args[1] == "install" {
             install(&args[2], false);
+        } else if &args[1] == "uninstall" {
+            uninstall(&args[2]);    
         } else {
             help();
         }       
