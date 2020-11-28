@@ -15,19 +15,11 @@ Vlugger is a simple plugin manager for Vim.
 
 This package manager uses [pathogen](https://github.com/tpope/vim-pathogen) and [git](https://git-scm.com).
 
-### Windows
+### Install
 
 You can either :
 
-- Go to releases and download the latest executable
-- Run `cargo install vlugger`
-
-### \*Nix
-
-You can either :
- 
-- Go to releases and download the latest executable
-- Download and run installer.sh
+- Download and run installer.sh (recommended)
 - Run `cargo install vlugger` in `/bin/`
 
 ## Getting started
@@ -44,6 +36,14 @@ If the repo exists, then run :
 ### Update your plugins
 
 Run `vlugger update` to update all the plugins located in `~/.vim/bundle/`.
+
+### Uninstall plugins
+
+Run `vlugger uninstall <plugin_name>` and it will be uninstalled.
+
+### List your installed plugins
+
+Run `vlugger list` and you'll see your installed plugins and their statuses.
 
 ### Getting more help
 
