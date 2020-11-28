@@ -1,22 +1,76 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use dirs;
 use std::fs;
+use regex::Regex;
+use std::collections::BTreeMap;
 
 fn help() {
     eprintln!("Vlugger by {} version {}", env!("CARGO_PKG_AUTHORS"), env!("CARGO_PKG_VERSION"));
-    eprintln!("\nvlugger <install | search | update | uninstall> <username>/<repo> [--no-vcs]");
+    eprintln!("\nvlugger <install | search | update | uninstall | list> <username>/<repo> [--no-vcs]");
     eprintln!("\nOPTIONS:");
     eprintln!("\tupdate    : update all the plugins in ~/.vim/bundle");
     eprintln!("\tinstall   : install the specified plugin");
     eprintln!("\tsearch    : search for the specified plugin");
     eprintln!("\tuninstall : uninstall the specified plugin");
+    eprintln!("\tlist      : list installed plugins and their statuses");
     eprintln!("\nFLAGS:");
     eprintln!("\t--no-vcs  : Specifies that the ~/ folder is not version controlled ( a submodule to the plugin will be added without this option)");
 
     std::process::exit(0);
 }
 
+fn get_name<'a>(path: &Path) -> String {
+    let splited = path.to_str().unwrap().split('/').collect::<Vec<&str>>();
+    String::from(splited[splited.len() - 1])
+}
+
+fn list() {
+    let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
+    let dir = match fs::read_dir(&format!("{}/.vim/bundle", home_dir)) {
+        Ok(d) => d,
+        Err(_e) => {
+            eprintln!("Cannot find directory {}/.vim/bundle/", home_dir);
+            std::process::exit(-8);
+        }
+    };
+
+    let mut status : BTreeMap<String, &str> = BTreeMap::new();
+    let re = Regex::new(r"\[(.*?)\]").unwrap();
+
+    for entry in dir {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(e) => {
+                eprintln!("Failed to read dir");
+                eprintln!("Debug info : {}", e);
+                std::process::exit(-7);
+            }
+        };
+       let  path = entry.path();
+
+        if path.is_dir() {
+            std::env::set_current_dir(path.clone()).unwrap();
+            let output = Command::new("git").arg("status").arg("-b").arg("-s").output().unwrap();
+            let stroutput = std::str::from_utf8(&output.stdout).unwrap();
+            if !re.is_match(stroutput) {
+                status.insert(get_name(path.as_path()), "Up to date");
+            } else {
+                // safe because checked before if it matches
+                let content = re.find(stroutput).unwrap().as_str();
+                if content.contains("behind") {
+                    status.insert(get_name(path.as_path()), "Update required");
+                } else {
+                    status.insert(get_name(path.as_path()), "Up to date");
+                }
+            };
+        }
+    }
+    for (folder, status) in status.iter() {
+        println!("{}..........{}", folder, status);
+    }
+
+}
 fn update() {
     let home_dir = dirs::home_dir().unwrap_or(PathBuf::from("~")).into_os_string().into_string().unwrap();
     let dir = match fs::read_dir(&format!("{}/.vim/bundle", home_dir)) {
@@ -172,6 +226,9 @@ fn main() {
             std::process::exit(0);
         } else if &args[1] == "update" {
             update();
+            std::process::exit(0);
+        } else if &args[1] == "list" {
+            list();
             std::process::exit(0);
         }
     }
