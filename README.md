@@ -20,7 +20,6 @@ This package manager uses [pathogen](https://github.com/tpope/vim-pathogen) and 
 You can either :
 
 - Run `cargo install vlugger` 
-- Run `werb install vlugger`
 
 ## Getting started
 
